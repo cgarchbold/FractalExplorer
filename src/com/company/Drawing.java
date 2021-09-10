@@ -2,11 +2,25 @@ package com.company;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.image.BufferedImage;
 
-public class Drawing extends Canvas {
+public class Drawing extends Canvas implements ChangeListener {
 
     public static final int IMAGE_SIZE = 512;
+
+    static final int SIZE_MIN = -5;
+    static final int SIZE_MAX = 50;
+    static final int SIZE_INIT = 20;
+
+    static final int XC_MIN = -50;
+    static final int XC_MAX = 50;
+    static final int XC_INIT = -7;
+
+    static final int YC_MIN = -50;
+    static final int YC_MAX = 50;
+    static final int YC_INIT = 0;
 
     public BufferedImage main_image = new BufferedImage(IMAGE_SIZE,IMAGE_SIZE, BufferedImage.TYPE_INT_RGB);
 
@@ -14,13 +28,17 @@ public class Drawing extends Canvas {
     private JSlider y_slide;
     private JSlider size_slide;
 
-    public Drawing(){
-        setSize(Drawing.IMAGE_SIZE,Drawing.IMAGE_SIZE);
-        calculate_colors(-0.75,0,3);
-        
-        x_slide = new JSlider();
-        y_slide = new JSlider();
-        size_slide = new JSlider();
+    public Drawing() {
+        setSize(Drawing.IMAGE_SIZE, Drawing.IMAGE_SIZE);
+        calculate_colors(XC_INIT / 10.0, YC_INIT / 10.0, SIZE_INIT / 10.0);
+
+        x_slide = new JSlider(JSlider.HORIZONTAL, XC_MIN, XC_MAX, XC_INIT);
+        y_slide = new JSlider(JSlider.HORIZONTAL, YC_MIN, YC_MAX, YC_INIT);
+        size_slide = new JSlider(JSlider.VERTICAL, SIZE_MIN, SIZE_MAX, SIZE_INIT);
+
+        x_slide.addChangeListener(this);
+        y_slide.addChangeListener(this);
+        size_slide.addChangeListener(this);
 
     }
 
@@ -75,5 +93,18 @@ public class Drawing extends Canvas {
 
     public void paint(Graphics g) {
         g.drawImage(main_image,0,0,IMAGE_SIZE, IMAGE_SIZE, null);
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+        JSlider source = (JSlider)e.getSource();
+        if (!source.getValueIsAdjusting()) {
+            double xc = x_slide.getValue() / 10.0;
+            double yc = y_slide.getValue() / 10.0;
+            double size = size_slide.getValue() / 10.0;
+            calculate_colors(xc, yc, size);
+            this.repaint();
+        }
+
     }
 }
